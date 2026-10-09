@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#090a0d">
+<title>My Wallet</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#090a0d;color:#f4f4f7;font:16px system-ui,Arial;padding:24px;max-width:650px;margin:auto}h1{font-size:30px}p{color:#a8a8b2}.card{padding:25px;border-radius:22px;color:#18191c;background:linear-gradient(130deg,#fff,#a6a9af,#e4e5e6);min-height:190px;margin:25px 0;box-shadow:0 15px 40px #0008}.brand{font-weight:900;letter-spacing:2px}.platinum{letter-spacing:5px;font-size:12px;margin-top:6px}.number{margin-top:50px;letter-spacing:3px}.panel{background:#17181d;border:1px solid #303139;border-radius:17px;padding:18px;margin:16px 0}small{color:#aaaab4}.balance{font-size:36px;font-weight:800;margin:6px 0 18px}input,select,button{width:100%;padding:13px;margin:7px 0;border-radius:10px;border:1px solid #393a43;background:#24252b;color:white;font:inherit}button{background:#e9e9ed;color:#111;font-weight:700;border:0}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.tx{border-bottom:1px solid #333;padding:12px 0}.plus{color:#8ee0a1}.minus{color:#ff9999}.note{font-size:12px;line-height:1.5}
+</style></head>
+<body>
+<h1>My Wallet</h1><p>Virtuální peněženka · Demo</p>
+<div class="card"><div class="brand">AMERICAN EXPRESS</div><div class="platinum">PLATINUM</div><div class="number">•••• &nbsp; •••• &nbsp; •••• &nbsp; 2048</div></div>
+<small>TVŮJ ZŮSTATEK</small><div class="balance" id="balance"></div>
+<select id="currency"><option value="EUR">EUR €</option><option value="CZK">CZK Kč</option></select>
+<div class="panel"><h3>Upravit zůstatek</h3><input id="amount" type="number" min="0.01" step="0.01" placeholder="Částka"><input id="note" maxlength="60" placeholder="Popis transakce"><div class="actions"><button onclick="change(1)">＋ Přidat</button><button onclick="change(-1)">− Odečíst</button></div></div>
+<div class="panel"><h3>Transakce</h3><div id="transactions"></div><button onclick="resetWallet()">Resetovat demo</button></div>
+<p class="note">Pouze virtuální demo. Není propojeno s bankou ani American Express a nepřijímá skutečné platby. Zůstatek a transakce se ukládají v tomto prohlížeči.</p>
+<script>
+let balance=Number(localStorage.getItem('mwBalance')||1250),tx=JSON.parse(localStorage.getItem('mwTx')||'[]');const $=id=>document.getElementById(id);const fmt=(n,c)=>new Intl.NumberFormat('cs-CZ',{style:'currency',currency:c}).format(n);function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function render(){let c=$('currency').value;$('balance').textContent=fmt(balance,c);$('transactions').innerHTML=tx.length?tx.map(t=>'<div class="tx"><div>'+esc(t.note)+' <b class="'+(t.amount>=0?'plus':'minus')+'">'+(t.amount>=0?'+':'−')+fmt(Math.abs(t.amount),'EUR')+'</b></div><small>'+esc(t.date)+'</small></div>').join(''):'<small>Zatím žádné transakce.</small>';localStorage.setItem('mwBalance',balance);localStorage.setItem('mwTx',JSON.stringify(tx))}function change(sign){let n=Number($('amount').value);if(!Number.isFinite(n)||n<=0)return alert('Zadej částku větší než nula.');n=Math.round(n*100)/100;if(sign<0&&n>balance)return alert('Nemůžeš odečíst víc, než máš.');balance=Math.round((balance+sign*n)*100)/100;tx.unshift({amount:sign*n,note:$('note').value.trim()||(sign>0?'Přidání peněz':'Platba'),date:new Date().toLocaleString('cs-CZ')});$('amount').value='';$('note').value='';render()}function resetWallet(){if(confirm('Resetovat demo peněženku?')){balance=1250;tx=[];render()}}$('currency').onchange=render;render();
+</script></body></html>
